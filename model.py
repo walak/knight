@@ -33,14 +33,14 @@ class Board:
 
 
 class Knight:
-    def __init__(self, x=0, y=0, marker=1):
+    def __init__(self, x=0, y=0, marker=0):
         self.x = x
-        self.y = x
+        self.y = y
         self.marker = marker
 
     def move(self, mv):
-        self.x -= mv[0]
-        self.y -= mv[1]
+        self.x += mv[0]
+        self.y += mv[1]
         self.marker += 1
         return self.x, self.y, self.marker
 
