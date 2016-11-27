@@ -5,7 +5,7 @@ from random import randint, choice
 def can_move(knight, board, move):
     x = knight.x + move[0]
     y = knight.y + move[1]
-    return not (are_in_board(x, y, board) or is_field_marked(x, y, board))
+    return not (are_out_of_board(x, y, board) or is_field_marked(x, y, board))
 
 
 def is_out_of_board(v, board):
