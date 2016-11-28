@@ -50,7 +50,7 @@ class Move:
     def __init__(self, knight, move):
         self.old_position = Coord(knight.x, knight.y)
         self.new_position = Coord(knight.x + move.x, knight.y + move.y)
-        self.move = Coord(move.x, move.y)
+        self.move = move
 
 
 class MoveHistory:
@@ -59,6 +59,9 @@ class MoveHistory:
         self.moves_number = len(moves)
         self.knight = knight
         self.board = board
+
+    def generate_seqence_description(self):
+        return ''.join([m.move.label for m in self.moves])
 
 
 DIRECTIONS = [
