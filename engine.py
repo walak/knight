@@ -1,10 +1,10 @@
-from model import Board, Knight, Move, MOVES
+from model import Board, Knight, Move, DIRECTIONS
 from random import randint, choice
 
 
 def can_move(knight, board, move):
-    x = knight.x + move[0]
-    y = knight.y + move[1]
+    x = knight.x + move.x
+    y = knight.y + move.y
     return not (are_out_of_board(x, y, board) or is_field_marked(x, y, board))
 
 
@@ -39,7 +39,7 @@ def get_random_location(max):
 
 
 def get_possible_moves(knight, board):
-    return [m for m in MOVES if can_move(knight, board, m)]
+    return [m for m in DIRECTIONS if can_move(knight, board, m)]
 
 
 def get_next_random_possible_move(knight, board):

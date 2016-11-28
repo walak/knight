@@ -1,14 +1,3 @@
-MOVES = [
-    (2, -1),
-    (1, -2),
-    (-1, -2),
-    (-2, -1),
-    (-2, 1),
-    (-1, 2),
-    (1, 2),
-    (2, 1)]
-
-
 class Board:
     BOARD_SIZE = 7
 
@@ -39,8 +28,8 @@ class Knight:
         self.marker = marker
 
     def move(self, mv):
-        self.x += mv[0]
-        self.y += mv[1]
+        self.x += mv.x
+        self.y += mv.y
         self.marker += 1
         return self.x, self.y, self.marker
 
@@ -51,11 +40,17 @@ class Coord:
         self.y = y
 
 
+class Direction(Coord):
+    def __init__(self, x, y, label):
+        super().__init__(x, y)
+        self.label = label
+
+
 class Move:
     def __init__(self, knight, move):
         self.old_position = Coord(knight.x, knight.y)
-        self.new_position = Coord(knight.x + move[0], knight.y + move[1])
-        self.move = Coord(move[0], move[1])
+        self.new_position = Coord(knight.x + move.x, knight.y + move.y)
+        self.move = Coord(move.x, move.y)
 
 
 class MoveHistory:
@@ -64,3 +59,14 @@ class MoveHistory:
         self.moves_number = len(moves)
         self.knight = knight
         self.board = board
+
+
+DIRECTIONS = [
+    Direction(2, -1, "1"),
+    Direction(1, -2, "2"),
+    Direction(-1, -2, "3"),
+    Direction(-2, -1, "4"),
+    Direction(-2, 1, "5"),
+    Direction(-1, 2, "6"),
+    Direction(1, 2, "7"),
+    Direction(2, 1, "8")]
