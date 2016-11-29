@@ -1,3 +1,7 @@
+from itertools import chain
+from json import encoder, dumps
+
+
 class Board:
     BOARD_SIZE = 7
 
@@ -10,6 +14,9 @@ class Board:
     def mark_field(self, x, y, v):
         self.fields[x][y] = v
 
+    def board_size(self):
+        return Board.BOARD_SIZE
+
     def __str__(self):
         output = ''
         for y in range(Board.BOARD_SIZE):
@@ -17,14 +24,26 @@ class Board:
             output += ''.join(ar) + "\n\n\n"
         return output
 
-    def board_size(self):
-        return Board.BOARD_SIZE
 
-
-class Knight:
-    def __init__(self, x=0, y=0, marker=0):
+class Coord:
+    def __init__(self, x, y):
         self.x = x
         self.y = y
+
+    def to_json(self):
+        return dumps(self.__dict__)
+
+
+class Direction(Coord):
+    def __init__(self, x, y, label):
+        super().__init__(x, y)
+        self.label = label
+
+
+class Knight(Coord):
+    def __init__(self, x=0, y=0, marker=0):
+        super().__init__(x, y)
+        self.start = Coord(x, y)
         self.marker = marker
 
     def move(self, mv):
@@ -32,18 +51,6 @@ class Knight:
         self.y += mv.y
         self.marker += 1
         return self.x, self.y, self.marker
-
-
-class Coord:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-
-class Direction(Coord):
-    def __init__(self, x, y, label):
-        super().__init__(x, y)
-        self.label = label
 
 
 class Move:
@@ -60,8 +67,18 @@ class MoveHistory:
         self.knight = knight
         self.board = board
 
-    def generate_seqence_description(self):
+    def generate_sequence_description(self):
         return ''.join([m.move.label for m in self.moves])
+
+
+class JsonMoveHistory:
+    def __init__(self, move_history):
+        self.sequence = move_history.generate_sequence_description()
+        self.start = move_history.knight.start
+        self.moves_number = move_history.moves_number
+
+    def to_json(self):
+        return dumps(self.__dict__)
 
 
 DIRECTIONS = [

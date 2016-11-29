@@ -2,7 +2,7 @@ import time
 from threading import Thread
 
 from engine import get_random_location, get_next_random_possible_move, move
-from model import Knight, Board, MoveHistory
+from model import Knight, Board, MoveHistory, JsonMoveHistory
 
 
 def create_random_knight():
@@ -17,7 +17,9 @@ def simulate_once():
     while next_move is not None:
         moves_so_far.append(move(knight, board, next_move))
         next_move = get_next_random_possible_move(knight, board)
-    return MoveHistory(moves_so_far, knight, board)
+    mh = MoveHistory(moves_so_far, knight, board)
+    print (JsonMoveHistory(mh).to_json())
+    return mh
 
 
 def simulate_until(condition=lambda: True):
