@@ -100,4 +100,4 @@ if __name__ == "__main__":
         while not simulator.done:
             time.sleep(1)
 
-    print("Calculation finished on demand. Simulations generated: %i" % len(simulator.result_counter))
+    print("Calculation finished on demand. Simulations generated: %i" % simulator.result_counter)
