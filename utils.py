@@ -16,5 +16,3 @@ def get_database_config_from_file():
 
     return "%s://%s:%s@%s/%s" % (engine, user, password, host, db)
 
-
-get_database_config_from_file()
