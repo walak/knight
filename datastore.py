@@ -5,9 +5,10 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from engine import SimpleTimer
+from utils import get_database_config_from_file
 
 Base = declarative_base()
-Engine = create_engine() #FIX ME: missing config
+Engine = create_engine(get_database_config_from_file())
 Session = sessionmaker(bind=Engine)
 Base.metadata.create_all(Engine)
 logging.basicConfig(level=logging.INFO)
