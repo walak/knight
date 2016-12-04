@@ -5,6 +5,7 @@ from datastore import Session, ResultStore
 from engine import get_random_location, get_next_random_possible_move, move
 from model import Knight, Board, MoveHistory
 from logging import getLogger, INFO
+from utils import get_batch_size
 
 
 def create_random_knight():
@@ -68,7 +69,7 @@ class Simulator(Thread):
         return
 
     def should_flush(self):
-        return len(self.results) >= 50
+        return len(self.results) >= get_batch_size()
 
     def flush(self):
         session = Session()
