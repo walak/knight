@@ -4,9 +4,10 @@ from timeit import default_timer
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from engine import SimpleTimer
 
 Base = declarative_base()
-Engine = create_engine("mysql://dev:dev123@127.0.0.1/dev")
+Engine = create_engine() #FIX ME: missing config
 Session = sessionmaker(bind=Engine)
 Base.metadata.create_all(Engine)
 logging.basicConfig(level=logging.INFO)
@@ -36,28 +37,44 @@ class StorableMoveHistory(Base):
                                    moves_number=len(descriptor))
 
 
+LOG = logging.getLogger("ResultStore")
+LOG.setLevel(logging.INFO)
+
+
 class ResultStore:
     def __init__(self, session):
         self.session = session
 
     def store_one(self, move_history):
-        entity = StorableMoveHistory.from_move_history(move_history)
-        start = default_timer()
-        self.session.add(entity)
-        end = default_timer()
-        logging.info("Stored %i entities in %.4f s" % (1, (end - start)))
+        timer = SimpleTimer.create_and_start()
 
+        entity = StorableMoveHistory.from_move_history(move_history)
+        self.session.add(entity)
         self.session.commit()
+
+        LOG.info("Stored %i entities in %.4f s" % (1, timer.get_time()))
 
     def store_batch(self, move_histories):
-        start = default_timer()
-        entities = {StorableMoveHistory.from_move_history(m) for m in move_histories if
-                    self.check_if_not_storable_exists(m)}
+        filtered_results = self.filter_and_convert_data(move_histories)
 
-        self.session.bulk_save_objects(entities)
+        timer = SimpleTimer.create_and_start()
+        self.session.bulk_save_objects(filtered_results)
         self.session.commit()
-        end = default_timer()
-        logging.info("Stored %i entities in %.4f s" % (len(entities), (end - start)))
+        logging.info("Stored %i entities in %.4f s" % (len(filtered_results), timer.get_time()))
+        return len(filtered_results)
+
+    def filter_and_convert_data(self, move_histories):
+        timer = SimpleTimer.create_and_start()
+        filtered_elements = {StorableMoveHistory.from_move_history(m) for m in move_histories if
+                             self.check_if_not_storable_exists(m)}
+
+        initial_size = len(move_histories)
+        final_size = len(filtered_elements)
+        difference = initial_size - final_size
+        time = timer.get_time()
+        LOG.info("Filtered %i results in %.4f to eliminate duplicates. Uniques kept: %i Duplicates removed: %i" % (
+            initial_size, time, final_size, difference))
+        return filtered_elements
 
     def check_if_not_storable_exists(self, non_storable):
         storable = StorableMoveHistory.from_move_history(non_storable)

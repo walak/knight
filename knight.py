@@ -1,10 +1,10 @@
 import time
 from threading import Thread
 
-from engine import get_random_location, get_next_random_possible_move, move
-from model import Knight, Board, MoveHistory, DIRECTIONS
 from datastore import Session, ResultStore
-from sys import stdin
+from engine import get_random_location, get_next_random_possible_move, move
+from model import Knight, Board, MoveHistory
+from logging import getLogger, INFO
 
 
 def create_random_knight():
@@ -34,17 +34,52 @@ def simulate_until_to_list(condition, history_list):
         history_list.append(simulate_once())
 
 
+def simulate_completely_to_list(list, continue_condition=lambda: True, flush_condition=lambda: False,
+                                flush_action=None):
+    while continue_condition():
+        list.append(simulate_once())
+        if flush_condition():
+            if flush_action:
+                flush_action()
+
+    if flush_action:
+        flush_action()
+
+    return list
+
+
+LOG = getLogger("Simulator")
+LOG.setLevel(INFO)
+
+
 class Simulator(Thread):
-    def __init__(self, finish_condition):
+    def __init__(self, continue_condition):
         super().__init__()
         self.results = []
-        self.finish_condition = finish_condition
+        self.result_counter = 0
+        self.continue_condition = continue_condition
+        self.flush_condition = lambda: self.should_flush()
+        self.flush_action = lambda: self.flush()
         self.done = False
 
     def run(self):
-        simulate_until_to_list(self.finish_condition, self.results)
+        simulate_completely_to_list(self.results, self.continue_condition, self.flush_condition, self.flush_action)
         self.done = True
         return
+
+    def should_flush(self):
+        return len(self.results) >= 5000
+
+    def flush(self):
+        session = Session()
+        store = ResultStore(session)
+        saved_results = store.store_batch(self.results)
+        self.result_counter += len(self.results)
+        LOG.info(
+            "%i simulations generated, %i results stored to DB (duplicates have been skipped). %i generated totally."
+            % (len(self.results), saved_results, self.result_counter))
+        self.results.clear()
+        session.close()
 
 
 if __name__ == "__main__":
@@ -61,10 +96,4 @@ if __name__ == "__main__":
         input()
         finish = True
 
-    history = simulator.results
-    print(len(history))
-
-    session = Session()
-    store = ResultStore(session)
-    store.store_batch(history)
-    session.close()
+    print("Calculation finished on demand. Simulations generated: %i" % len(simulator.results))
