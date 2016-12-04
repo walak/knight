@@ -1,6 +1,7 @@
-from model import Board, Knight, Move, DIRECTIONS
 from random import randint, choice
 from timeit import default_timer
+
+from model import Move, DIRECTIONS
 
 
 def can_move(knight, board, move):
@@ -51,16 +52,3 @@ def get_next_random_possible_move(knight, board):
         return None
 
 
-class SimpleTimer:
-    def __init__(self, start_time=0.0):
-        self.start_time = start_time
-
-    def start(self):
-        self.start_time = default_timer()
-
-    def get_time(self):
-        return default_timer() - self.start_time
-
-    @staticmethod
-    def create_and_start():
-        return SimpleTimer(default_timer())

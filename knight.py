@@ -68,7 +68,7 @@ class Simulator(Thread):
         return
 
     def should_flush(self):
-        return len(self.results) >= 5000
+        return len(self.results) >= 50
 
     def flush(self):
         session = Session()
@@ -92,8 +92,11 @@ if __name__ == "__main__":
     board = Board()
     simulator = Simulator(condition)
     simulator.start()
-    while not (finish or simulator.done):
+    while not finish:
         input()
         finish = True
+        print("Finishing calculations... wait until worker thread will be finished")
+        while not simulator.done:
+            time.sleep(1)
 
-    print("Calculation finished on demand. Simulations generated: %i" % len(simulator.results))
+    print("Calculation finished on demand. Simulations generated: %i" % len(simulator.result_counter))

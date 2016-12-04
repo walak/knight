@@ -1,11 +1,10 @@
 import logging
-from timeit import default_timer
 
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from engine import SimpleTimer
-from utils import get_database_config_from_file
+
+from utils import get_database_config_from_file, SimpleTimer
 
 Base = declarative_base()
 Engine = create_engine(get_database_config_from_file())
