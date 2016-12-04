@@ -2,8 +2,9 @@ import time
 from threading import Thread
 
 from engine import get_random_location, get_next_random_possible_move, move
-from model import Knight, Board, MoveHistory
+from model import Knight, Board, MoveHistory, DIRECTIONS
 from datastore import Session, ResultStore
+from sys import stdin
 
 
 def create_random_knight():
@@ -34,24 +35,36 @@ def simulate_until_to_list(condition, history_list):
 
 
 class Simulator(Thread):
-    def __init__(self, condition):
+    def __init__(self, finish_condition):
         super().__init__()
         self.results = []
-        self.condition = condition
+        self.finish_condition = finish_condition
+        self.done = False
 
     def run(self):
-        simulate_until_to_list(self.condition, self.results)
+        simulate_until_to_list(self.finish_condition, self.results)
+        self.done = True
         return
 
 
 if __name__ == "__main__":
-    start = time.time()
-    condition = lambda: time.time() - start <= 1.0
+    finish = False
 
-    history = simulate_until(condition)
+    start = time.time()
+    condition = lambda: not finish
+
+    knight = Knight(2, 2)
+    board = Board()
+    simulator = Simulator(condition)
+    simulator.start()
+    while not (finish or simulator.done):
+        input()
+        finish = True
+
+    history = simulator.results
+    print(len(history))
 
     session = Session()
     store = ResultStore(session)
     store.store_batch(history)
     session.close()
-    print(len(history))
