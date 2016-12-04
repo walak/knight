@@ -2,7 +2,8 @@ import time
 from threading import Thread
 
 from engine import get_random_location, get_next_random_possible_move, move
-from model import Knight, Board, MoveHistory, JsonMoveHistory
+from model import Knight, Board, MoveHistory
+from datastore import Session, ResultStore
 
 
 def create_random_knight():
@@ -18,7 +19,6 @@ def simulate_once():
         moves_so_far.append(move(knight, board, next_move))
         next_move = get_next_random_possible_move(knight, board)
     mh = MoveHistory(moves_so_far, knight, board)
-    print (JsonMoveHistory(mh).to_json())
     return mh
 
 
@@ -49,4 +49,9 @@ if __name__ == "__main__":
     condition = lambda: time.time() - start <= 1.0
 
     history = simulate_until(condition)
+
+    session = Session()
+    store = ResultStore(session)
+    store.store_batch(history)
+    session.close()
     print(len(history))

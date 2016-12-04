@@ -1,5 +1,4 @@
-from itertools import chain
-from json import encoder, dumps
+from json import dumps
 
 
 class Board:
@@ -69,16 +68,6 @@ class MoveHistory:
 
     def generate_sequence_description(self):
         return ''.join([m.move.label for m in self.moves])
-
-
-class JsonMoveHistory:
-    def __init__(self, move_history):
-        self.sequence = move_history.generate_sequence_description()
-        self.start = move_history.knight.start
-        self.moves_number = move_history.moves_number
-
-    def to_json(self):
-        return dumps(self.__dict__)
 
 
 DIRECTIONS = [
