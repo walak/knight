@@ -7,9 +7,10 @@ from model import Knight, Board, MoveHistory
 from logging import getLogger, INFO
 from utils import get_batch_size
 from simulator import Simulator
+from mechanics import FinishWatch
 
 if __name__ == "__main__":
-    finish = False
+    finish_watch = FinishWatch()
 
     start = time.time()
     condition = lambda: not finish

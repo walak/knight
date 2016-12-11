@@ -1,30 +1,47 @@
 from threading import Lock, Thread
-from datastore import ResultStore
 from time import sleep
+
+from utils import generate_random_id
+
+
+class FinishHandle:
+    def __init__(self, lock):
+        self.finished = False
+        self.lock = lock
+        self.id = generate_random_id()
+
+    def confirm_finish(self):
+        self.lock.acquire()
+        self.finished = True
+        self.lock.release()
 
 
 class FinishWatch:
     def __init__(self):
         self.finished = False
-        self.finish_confirmations = {}
+        self.finish_handlers = set()
         self.lock = Lock()
 
     def finish(self):
         self.finished = True
 
-    def register_for_confirmation(self, name):
-        self.finish_confirmations[name] = False
-
-    def confirm_finish(self, name):
-        self.lock.acquire()
-        self.finish_confirmations[name] = True
-        self.lock.release()
+    def register(self):
+        handle = FinishHandle(self.lock)
+        self.__lock()
+        self.finish_handlers.add(handle)
+        return handle
 
     def all_confirmed_finished(self):
-        self.lock.acquire()
-        all_finished = len({v for v in self.finish_confirmations.values() if v == False}) > 0
-        self.lock.release()
+        self.__lock()
+        all_finished = len({f.finished for f in self.finish_handlers if f.finished == False}) > 0
+        self.__unlock()
         return all_finished
+
+    def __lock(self):
+        self.lock.acquire()
+
+    def __unlock(self):
+        self.lock.release()
 
 
 class TemporalResultStore(Thread):

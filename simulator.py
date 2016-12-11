@@ -53,7 +53,7 @@ LOG.setLevel(INFO)
 
 
 class Simulator(Thread):
-    def __init__(self, continue_condition):
+    def __init__(self, continue_condition, finish_watch):
         super().__init__()
         self.results = []
         self.result_counter = 0
@@ -61,6 +61,9 @@ class Simulator(Thread):
         self.flush_condition = lambda: self.should_flush()
         self.flush_action = lambda: self.flush()
         self.done = False
+        self.finish_watch = finish_watch
+
+        finish_watch.register_for_confirmation("Simulator")
 
     def run(self):
         simulate_completely_to_list(self.results, self.continue_condition, self.flush_condition, self.flush_action)

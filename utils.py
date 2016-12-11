@@ -1,4 +1,6 @@
 import configparser
+import random
+import string
 from timeit import default_timer
 
 CONFIG_FILE = "database.ini"
@@ -35,3 +37,7 @@ class SimpleTimer:
     @staticmethod
     def create_and_start():
         return SimpleTimer(default_timer())
+
+
+def generate_random_id(n=5):
+    return ''.join(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(n)))
