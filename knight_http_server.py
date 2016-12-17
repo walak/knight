@@ -33,5 +33,4 @@ def store_bundle():
 
 if __name__ == "__main__":
     temporal_store.start()
-    App.run(port=3333, threaded=True)
-
+    App.run(host='0.0.0.0', port=3333, threaded=True)
