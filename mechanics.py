@@ -1,8 +1,9 @@
+from logging import getLogger, INFO
 from threading import Lock, Thread
 from time import sleep
 
+from datastore import Session, ResultStore
 from utils import generate_random_id
-from logging import getLogger, INFO
 
 
 class FinishHandle:
@@ -52,18 +53,19 @@ class FinishWatch:
 
 
 class TemporalResultStore(Thread):
-    def __init__(self, result_store, finish_watch):
+    def __init__(self, finish_watch):
         super().__init__()
-        self.items = {}
+        self.items = set()
         self.datalock = Lock()
-        self.result_store = result_store
         self.finish_watch = finish_watch
         self.finish_handle = self.finish_watch.register()
 
     def queue_items(self, items):
         self.datalock.acquire()
-        self.items.update(items)
-        self.datalock.release()
+        try:
+            self.items.update(items)
+        finally:
+            self.datalock.release()
 
     def get_number_items_in_queue(self):
         return len(self.items)
@@ -75,8 +77,16 @@ class TemporalResultStore(Thread):
         self.finish_handle.confirm_finish()
 
     def run_reconciliation(self):
+        session = Session()
+        store = ResultStore(session)
+
         self.datalock.acquire()
-        items_to_save = self.items
-        self.items = {}
-        self.result_store.store_batch(items_to_save)
-        self.datalock.release()
+        try:
+            items_to_save = self.items
+            self.items = set()
+        finally:
+            self.datalock.release()
+
+        store.store_batch(items_to_save)
+        session.close()
+

@@ -2,8 +2,9 @@ import configparser
 import random
 import string
 from timeit import default_timer
+from jsonpickle import pickler
 
-CONFIG_FILE = "database.ini"
+CONFIG_FILE = "../database.ini"
 CONFIG = configparser.ConfigParser()
 CONFIG.read(CONFIG_FILE)
 
@@ -41,3 +42,7 @@ class SimpleTimer:
 
 def generate_random_id(n=5):
     return ''.join(''.join(random.choice(string.ascii_letters + string.digits) for _ in range(n)))
+
+
+def to_json(entity):
+    return pickler.encode(entity,unpicklable=False)

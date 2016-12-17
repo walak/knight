@@ -5,9 +5,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from utils import get_database_config_from_file, SimpleTimer
+from config import AppConfigProvider, AppConfiguration
 
+Config = AppConfigProvider().get_config()
 Base = declarative_base()
-Engine = create_engine(get_database_config_from_file())
+Engine = create_engine(Config.get_db_url())
 Session = sessionmaker(bind=Engine)
 Base.metadata.create_all(Engine)
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +29,14 @@ class StorableMoveHistory(Base):
     def __eq__(self, other):
         return self.__hash__() == other.__hash__()
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['_sa_instance_state']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
     @staticmethod
     def from_move_history(move_history):
         descriptor = move_history.generate_sequence_description()
@@ -35,6 +45,17 @@ class StorableMoveHistory(Base):
                                    knight_start_x=move_history.knight.start.x,
                                    knight_start_y=move_history.knight.start.y,
                                    moves_number=len(descriptor))
+
+    @staticmethod
+    def from_dict(di):
+        descriptor = di['descriptor']
+        knight_start_x = di['knight_start_x']
+        knight_start_y = di['knight_start_y']
+        moves_number = di['moves_number']
+        return StorableMoveHistory(descriptor=descriptor,
+                                   knight_start_x=knight_start_x,
+                                   knight_start_y=knight_start_y,
+                                   moves_number=moves_number)
 
 
 LOG = logging.getLogger("ResultStore")
@@ -65,7 +86,7 @@ class ResultStore:
 
     def filter_and_convert_data(self, move_histories):
         timer = SimpleTimer.create_and_start()
-        filtered_elements = {StorableMoveHistory.from_move_history(m) for m in move_histories if
+        filtered_elements = {self.to_storable(m) for m in move_histories if
                              self.check_if_not_storable_exists(m)}
 
         initial_size = len(move_histories)
@@ -77,7 +98,7 @@ class ResultStore:
         return filtered_elements
 
     def check_if_not_storable_exists(self, non_storable):
-        storable = StorableMoveHistory.from_move_history(non_storable)
+        storable = self.to_storable(non_storable)
         return self.check_if_exist(storable)
 
     def check_if_exist(self, storable):
@@ -89,3 +110,9 @@ class ResultStore:
 
     def store_slow(self, move_histories):
         [self.store_one(m) for m in move_histories]
+
+    def to_storable(self, maybe_storable):
+        if isinstance(maybe_storable, StorableMoveHistory):
+            return maybe_storable
+        else:
+            return StorableMoveHistory.from_move_history(maybe_storable)

@@ -1,4 +1,5 @@
 from json import dumps
+from configparser import ConfigParser
 
 
 class Board:
@@ -68,6 +69,7 @@ class MoveHistory:
 
     def generate_sequence_description(self):
         return ''.join([m.move.label for m in self.moves])
+
 
 
 DIRECTIONS = [

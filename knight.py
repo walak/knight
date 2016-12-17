@@ -1,13 +1,8 @@
 import time
-from threading import Thread
 
-from datastore import Session, ResultStore
-from engine import get_random_location, get_next_random_possible_move, move
-from model import Knight, Board, MoveHistory
-from logging import getLogger, INFO
-from utils import get_batch_size
-from simulator import Simulator
 from mechanics import FinishWatch
+from model import Knight, Board
+from simulator import Simulator
 
 if __name__ == "__main__":
     finish_watch = FinishWatch()
