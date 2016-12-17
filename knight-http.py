@@ -15,11 +15,19 @@ def status():
     return "OK!"
 
 
-@App.route("/store_bundle", methods=["POST"])
-def store_bundle():
+@App.route("/store_one", methods=["POST"])
+def store_one():
     json = request.get_json(force=True)
     smh = StorableMoveHistory.from_dict(json)
     temporal_store.queue_items([smh])
+    return Response(status=200)
+
+
+@App.route("/store_bundle", methods=["POST"])
+def store_bundle():
+    json = request.get_json(force=True)
+    stories = [StorableMoveHistory.from_dict(s) for s in json]
+    temporal_store.queue_items(stories)
     return Response(status=200)
 
 
