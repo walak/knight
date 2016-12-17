@@ -31,6 +31,12 @@ class AppConfiguration:
     def get_batch_size(self):
         return self.config['runner'].getint('batch_size')
 
+    def get_http_host(self):
+        return self.config['runner']['http_host']
+
+    def get_http_port(self):
+        return self.config['runner'].getint('http_port')
+
     @staticmethod
     def empty():
         return AppConfiguration(None)
