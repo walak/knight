@@ -23,8 +23,9 @@ class HttpSimulator(Simulator):
         http_connection = client.HTTPConnection(self.app_config.get_http_host(),
                                                 self.app_config.get_http_port())
         http_connection.connect()
-
         http_connection.request("POST", "/store_bundle", payload)
+
+        http_connection.close()
 
         self.result_counter += len(self.results)
         self.results.clear()
