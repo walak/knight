@@ -3,7 +3,7 @@ from threading import Lock, Thread
 from time import sleep
 
 from datastore import Session, ResultStore
-from utils import generate_random_id
+from utils import generate_random_id, SimpleTimer
 
 
 class FinishHandle:
@@ -72,8 +72,11 @@ class TemporalResultStore(Thread):
 
     def run(self):
         while not self.finish_watch.finished:
+            rec_timer = SimpleTimer.create_and_start()
             self.run_reconciliation()
-            sleep(5)
+            if rec_timer.get_time() < 5:
+                sleep(1)
+
         self.finish_handle.confirm_finish()
 
     def run_reconciliation(self):
@@ -89,4 +92,3 @@ class TemporalResultStore(Thread):
 
         store.store_batch(items_to_save)
         session.close()
-
